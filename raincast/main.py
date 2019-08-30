@@ -2,7 +2,7 @@ import requests
 import argparse
 import logging
 from datetime import datetime
-#from typing import List, Dict, Any
+
 logger = logging.getLogger(__name__)
 
 # from https://www.metaweather.com/api/
@@ -12,13 +12,9 @@ RAINY_STATE = {
     's': 'showers',
 }
 
-def display_forecast(args, forecast):
-
-
+def display_today_forecast(args, forecast):
     today = datetime.now().strftime('%Y-%m-%d')
     today_fcast = next(filter(lambda x: x['applicable_date'] == today, forecast))
-
-
     maybe_rain = RAINY_STATE.get(today_fcast['weather_state_abbr'])
     if not maybe_rain:
         if args.m:
@@ -29,7 +25,7 @@ def display_forecast(args, forecast):
     else:
         if args.m:
             print('yes')
-        else:        
+        else:
             print(f'It\'s going to rain in {args.city}, expect {maybe_rain}.')
         if args.exit_with_error:
             exit(1)
@@ -48,7 +44,6 @@ def main():
         'disallowing scripts to run on a rainy day'))
     args = parser.parse_args()
     session = requests.Session()
-
     try:
         r = session.get(
             f'https://www.metaweather.com/api/location/search/?query={args.city}')
@@ -62,13 +57,14 @@ def main():
         r = session.get(
             f'https://www.metaweather.com/api/location/{woeid}/')
         forecast = r.json()
-        display_forecast(args, forecast['consolidated_weather'])
-
+        display_today_forecast(args, forecast['consolidated_weather'])
 
     except requests.RequestException:
         logger.exception('Network/http error')
         exit(3)
-    #
-    
+    except Exception:
+        logger.exception('Unknown error')
+        exit(4)
+
 if __name__ == '__main__':
     main()

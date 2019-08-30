@@ -33,3 +33,4 @@ optional arguments:
 - 1: (implies -e) it's raining
 - 2: city not found
 - 3: network error
+- 4: unhandled error
